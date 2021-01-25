@@ -1,8 +1,8 @@
 # Jarosław Zabuski, Jakub Strawa
 
-from collections import Counter
 import math
 import random
+from collections import Counter
 
 
 # class Row: category - edible attribute values,
@@ -13,6 +13,7 @@ class Row:
         self.category = category
         self.dictionary = dictionary
 
+
 # class Node: name - name of attribute,
 # childrenDictionary - dictionary of attribute values and corresponding children nodes
 # if node has no children, then node name is either EDIBLE or POISONOUS and childrenDictionary is empty
@@ -20,6 +21,7 @@ class Node:
     def __init__(self, name):
         self.name = name
         self.childrenDictionary = {}
+
 
 # class ID3: attributes - list with all yet unused attributes except first one - edible,
 # learningDataSet - list of rows with learning data,
@@ -146,7 +148,7 @@ class ID3:
             return Node(catFreqs.most_common(1)[0][0])
 
         # randomly choose which attribute to use
-        pickedGain  = random.uniform(0.0, sum(gainsList))
+        pickedGain = random.uniform(0.0, sum(gainsList))
         pickedAttribute = ""
         for i in range(0, len(gainsList)):
             pickedGain -= gainsList[i]
