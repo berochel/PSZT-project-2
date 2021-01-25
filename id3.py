@@ -1,3 +1,5 @@
+# Jarosław Zabuski, Jakub Strawa
+
 from collections import Counter
 import math
 import random
@@ -22,7 +24,9 @@ class Node:
 # class ID3: attributes - list with all yet unused attributes except first one - edible,
 # learningDataSet - list of rows with learning data,
 # testingDataSet - list of rows used for testing, root - root node in decision tree,
-# percentLearning- percentage of data used for learning
+# percentLearning - percentage of data used for learning
+# categories - all possible categories decision tree can predict - in case of mushrooms - if edible
+# max_tree_depth - used only for testing
 class ID3:
     def __init__(self, percent=5):
         self.attributes = []
@@ -30,6 +34,8 @@ class ID3:
         self.testingDataSet = []
         self.root = None
         self.percentLearning = percent
+        self.categories = {}
+        self.max_tree_depth = 0
 
     # setup function for reading data and preparing variables
     def prepare_data(self, filename="mushroom.txt"):
@@ -44,8 +50,13 @@ class ID3:
             line = line.strip().split(",")
             examples.append(line)
 
+        input_file.close()
+        # create set with all possible category values
+        self.categories = set([i[0] for i in examples])
+
         # numberOfLearningRows - defines a size of the training set
         numberOfLearningRows = int(len(examples) * (self.percentLearning / 100))
+        # shuffle all data rows
         random.shuffle(examples)
 
         count = 0
@@ -108,7 +119,7 @@ class ID3:
 
         return newNode
 
-    # modified ID3 implementation, uses roulette system based on entropy and info gain to draw next node in decision tree
+    # modified ID3 implementation, uses roulette system based on info gain to draw next node in decision tree
     def modified_ID3(self, dataRows, unusedAttributes):
         # finds how many categories there are in the data set rows
         # if there is only one, that means that the data set is self-explanatory
@@ -167,6 +178,8 @@ class ID3:
 
     # prints decision tree
     def print_tree(self, node, level=0):
+        if self.max_tree_depth < level:
+            self.max_tree_depth = level
         if len(node.childrenDictionary) == 0:
             print("  |  " * level + node.name)
 
@@ -214,23 +227,19 @@ class ID3:
 
         return self.test_node(ex, node)
 
-    # calculates entropy of currently checked data columns
+    # calculates entropy of currently checked data
     def entropy(self, dataRows):
         tempEntropy = 0
-        counterEdible = 0
-        counterPoisonous = 0
-        for i in dataRows:
-            if i.category == "EDIBLE":
-                counterEdible += 1
-            else:
-                counterPoisonous += 1
+        # count all rows with given category and calculate entropy
+        for category in self.categories:
+            counter = 0
+            for row in dataRows:
+                if row.category == category:
+                    counter += 1
 
-        countEdible = counterEdible / len(dataRows)
-        countPoisonous = counterPoisonous / len(dataRows)
-        if countEdible != 0:
-            tempEntropy -= (countEdible * math.log(countEdible, 2))
-        if countPoisonous != 0:
-            tempEntropy -= (countPoisonous * math.log(countPoisonous, 2))
+            count = counter / len(dataRows)
+            if count != 0:
+                tempEntropy -= (count * math.log(count, 2))
 
         return tempEntropy
 
